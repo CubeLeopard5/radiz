@@ -1,5 +1,7 @@
 <template>
-	<NuxtPage/>
+	<NuxtLayout>
+		<NuxtPage />
+  	</NuxtLayout>
 </template>
 
 <style>
@@ -10,6 +12,7 @@
 	--bg: white;
 	--bg-secondary: #f0f2f5;
 	--border-color: #13850a;
+	--error: #FF4D4D;
 }
 
 .dark-mode {
@@ -19,6 +22,7 @@
 	--bg: black;
 	--bg-secondary: #28282B;
 	--border-color: #13850a;
+	--error: #FF4D4D;
 }
 
 body {

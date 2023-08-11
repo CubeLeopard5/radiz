@@ -1,19 +1,23 @@
 import { defineStore } from 'pinia';
 
-
-export const useFiltersStore = defineStore({
-   id: 'filter-store',
-   state: () => {
-       return {
-           filtersList: ['youtube', 'twitch'],
-       }
-   },
-   actions: {
-       addValueToFilterList(value: string) {
-           this.filtersList.push(value);
-       },
-   },
-   getters: {
-       filteredList: state => state.filtersList,
-   },
-});
+export const useMainStore = defineStore({
+	id: 'main-store',
+	state: () => {
+		return {
+			accessToken: "",
+			connectedUser: {},
+		}
+	},
+	actions: {
+		setAccessToken(token: string) {
+			this.accessToken = token;
+		},
+		setConnectedUser(obj: object) {
+			this.connectedUser = obj;
+		},
+	},
+	getters: {},
+	persist: {
+		storage: persistedState.localStorage,
+	},
+})
