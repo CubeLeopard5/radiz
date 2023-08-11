@@ -6,15 +6,15 @@
         <a-modal v-model:visible="visible" :title="'Login' + ': ' + errMessage" @ok="handleOk"
             :style="{ '--bg-error': (error) ? '#FF4D4D' : '#13850a' }" :class="(error) ? 'login-failure' : ''"
             :footer="null">
-            <a-form :model="formState" name="normal_login" class="login-form">
+            <a-form :model="formState" name="normal_login" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
                 <a-form-item :label="'Email'" name="email" :rules="[
                     {
                         required: true,
-                        message: 'aa'
+                        message: 'Please enter your email'
                     },
                     {
                         type: 'email',
-                        message: 'email'
+                        message: 'Please enter a valid email'
                     },
                 ]">
                     <a-input v-model:value="formState.email">
@@ -23,15 +23,22 @@
                         </template>
                     </a-input>
                 </a-form-item>
-                <a-form-item :label="'Password'" name="password" :rules="[{ required: true, message: 'ee' }]">
+                <a-form-item :label="'Password'" name="password" :rules="[{ required: true, message: 'Please enter your password' }]">
                     <a-input-password v-model:value="formState.password" v-on:keyup.enter="handleOk">
                         <template #prefix>
                             <LockOutlined/>
                         </template>
                     </a-input-password>
                 </a-form-item>
-                <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-                    <a-button type="primary" html-type="submit" @click="handleOk">Submit</a-button>
+                <a-form-item :wrapper-col="{ offset: 4, span: 20 }">
+                    <div class="group-button-log-can">
+                        <a-button type="primary" @click="resetForm" class="button-cancel">
+                            <span> Cancel </span>
+                        </a-button>
+                        <a-button type="primary" html-type="submit" @click="handleOk" class="button-login">
+                            <span> Submit </span>
+                        </a-button>
+                    </div>
                 </a-form-item>
             </a-form>
         </a-modal>
@@ -71,6 +78,7 @@ export default defineComponent({
                 errMessage.value = '';
                 error.value = false;
                 visible.value = false;
+                resetForm();
             }
         };
 
@@ -81,6 +89,11 @@ export default defineComponent({
             return false;
         };
 
+        const resetForm = () => {
+            formState.email = '';
+            formState.password = '';
+        };
+
         return {
             formState,
             visible,
@@ -88,6 +101,7 @@ export default defineComponent({
             errMessage,
             handleOk,
             checkInputs,
+            resetForm,
         }
     }
 });
@@ -96,10 +110,16 @@ export default defineComponent({
 <style>
 .ant-modal-header {
     background: var(--bg-error);
+    border-bottom: none;
 }
 
 .ant-modal-title {
     color: var(--color);
+}
+
+.ant-modal-body {
+    background: var(--bg);
+    padding-bottom: 1px !important
 }
 
 .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
@@ -109,6 +129,55 @@ export default defineComponent({
 .ant-input-affix-wrapper:focus, .ant-input-affix-wrapper-focused {
     border-color: var(--color-primary);
     box-shadow: none;
+}
+
+.ant-form-item-label > label {
+    color: var(--color);
+}
+
+.group-button-log-can {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.button-login {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    border-radius: 6px;
+}
+
+.button-login:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    border-radius: 6px;
+}
+
+.button-login:focus {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    border-radius: 6px;
+}
+
+.button-cancel {
+    background: var(--error);
+    border-color: var(--error);
+    border-radius: 6px;
+    color: var(--color);
+}
+
+.button-cancel:hover {
+    background: var(--error);
+    border-color: var(--error);
+    border-radius: 6px;
+    color: var(--color);
+}
+
+.button-cancel:focus {
+    background: var(--error);
+    border-color: var(--error);
+    border-radius: 6px;
+    color: var(--color);
 }
 
 .login-failure {
