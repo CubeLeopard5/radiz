@@ -57,6 +57,7 @@
 </template>
 
 <script lang="ts">
+import { useMainStore } from '~/store/main';
 import { defineComponent, reactive } from 'vue';
 import { MailOutlined, UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
@@ -75,6 +76,7 @@ export default defineComponent({
     setup() {
         const request = useRequest();
         const router = useRouter();
+        const store = useMainStore();
         const formState = reactive<FormState>({
             email: '',
             username: '',
@@ -90,6 +92,8 @@ export default defineComponent({
                 errMessage.value = response.response;
                 error.value = true;
             } else {
+                localStorage.setItem('authToken', response.token);
+                store.setConnectedUser(response);
                 errMessage.value = '';
                 error.value = false;
                 visible.value = false;

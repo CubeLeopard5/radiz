@@ -21,6 +21,7 @@
         <div class="buttons-group">
             <HeaderLogin/>
             <HeaderRegister/>
+            <RadizButton text="logout" @onClick="handleOk"/>
         </div>
     </div>
 </template>
@@ -32,12 +33,19 @@ const state = reactive({
     checkedT: true,
     checkedL: true,
 });
+
+const handleOk = () => {
+    const router = useRouter();
+    localStorage.setItem('authToken', '');
+    router.push({ path: '/' });
+}
 </script>
 
 <style scoped>
 .buttons-group {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 24px;
 }
 
