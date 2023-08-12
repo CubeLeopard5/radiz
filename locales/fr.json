@@ -1,5 +1,41 @@
 {
-    "hello": "Bonjour, {name}!",
-    "language": "Langue"
+    "header": {
+        "login": {
+            "text": "Connexion",
+            "email": {
+                "label": "Email",
+                "no-input": "Entrez votre email.",
+                "wrong-input": "Entrez un email valide."
+            },
+            "password": {
+                "label": "Password",
+                "no-input": "Entrez votre mot de passe."
+            },
+            "buttons": {
+                "cancel": "Annuler",
+                "submit": "Envoyer"
+            }
+        },
+        "register": {
+            "text": "Inscription",
+            "email": {
+                "label": "Email",
+                "no-input": "Entrez votre email.",
+                "wrong-input": "Entrez un email valide."
+            },
+            "username": {
+                "label": "Username",
+                "no-input": "Entrez votre nom d'utilisateur."
+            },
+            "password": {
+                "label": "Password",
+                "no-input": "Entrez votre mot de passe."
+            },
+            "buttons": {
+                "cancel": "Annuler",
+                "submit": "Envoyer"
+            }
+        }
+    }
 }
  

@@ -1,5 +1,40 @@
 {
-    "hello": "Hello, {name}!",
-    "language": "Language"
- }
- 
+    "header": {
+        "login": {
+            "text": "Login",
+            "email": {
+                "label": "Email",
+                "no-input": "Please enter your email.",
+                "wrong-input": "Please enter a valid email."
+            },
+            "password": {
+                "label": "Password",
+                "no-input": "Please enter your password."
+            },
+            "buttons": {
+                "cancel": "Cancel",
+                "submit": "Submit"
+            }
+        },
+        "register": {
+            "text": "Register",
+            "email": {
+                "label": "Email",
+                "no-input": "Please enter your email.",
+                "wrong-input": "Please enter a valid email."
+            },
+            "username": {
+                "label": "Username",
+                "no-input": "Please enter your username."
+            },
+            "password": {
+                "label": "Password",
+                "no-input": "Please enter your password."
+            },
+            "buttons": {
+                "cancel": "Cancel",
+                "submit": "Submit"
+            }
+        }
+    }
+}

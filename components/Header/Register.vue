@@ -1,18 +1,18 @@
 <template>
     <div>
-        <RadizButton text="Register" @onClick="visible = true"/>
-        <a-modal v-model:visible="visible" :title="'register' + ': ' + errMessage" @ok="handleOk"
+        <RadizButton :text="$t('header.register.text')" @onClick="visible = true"/>
+        <a-modal v-model:visible="visible" :title="$t('header.register.text') + ': ' + errMessage" @ok="handleOk"
             :style="{ '--bg-error': (error) ? '#FF4D4D' : '#13850a' }" :class="(error) ? 'register-failure' : ''"
             :footer="null">
             <a-form :model="formState" name="normal_register" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-                <a-form-item :label="'Email'" name="email" :rules="[
+                <a-form-item :label="$t('header.register.email.label')" name="email" :rules="[
                     {
                         required: true,
-                        message: 'Please enter your email'
+                        message: $t('header.register.email.no-input')
                     },
                     {
                         type: 'email',
-                        message: 'Please enter a valid email'
+                        message: $t('header.register.email.wrong-input')
                     },
                 ]">
                     <a-input v-model:value="formState.email">
@@ -21,14 +21,24 @@
                         </template>
                     </a-input>
                 </a-form-item>
-                <a-form-item :label="'Username'" name="username" :rules="[{ required: true, message: 'Please enter your username' }]">
+                <a-form-item :label="$t('header.register.username.label')" name="username" :rules="[
+                    {
+                        required: true,
+                        message: $t('header.register.username.no-input')
+                    }
+                ]">
                     <a-input v-model:value="formState.username">
                         <template #prefix>
                             <UserOutlined/>
                         </template>
                     </a-input>
                 </a-form-item>
-                <a-form-item :label="'Password'" name="password" :rules="[{ required: true, message: 'Please enter your password' }]">
+                <a-form-item :label="$t('header.register.password.label')" name="password" :rules="[
+                    {
+                        required: true,
+                        message: $t('header.register.password.no-input')
+                    }
+                ]">
                     <a-input-password v-model:value="formState.password">
                         <template #prefix>
                             <LockOutlined/>
@@ -37,8 +47,8 @@
                 </a-form-item>
                 <a-form-item :wrapper-col="{ offset: 4, span: 20 }">
                     <div class="group-button-log-can">
-                        <RadizButtonError text="Annuler" @onClick="resetForm"/>
-                        <RadizButton text="Envoyer" @onClick="handleOk" :disabled="checkInputs()"/>
+                        <RadizButtonError :text="$t('header.register.buttons.cancel')" @onClick="resetForm"/>
+                        <RadizButton :text="$t('header.register.buttons.submit')" @onClick="handleOk" :disabled="checkInputs()"/>
                     </div>
                 </a-form-item>
             </a-form>
