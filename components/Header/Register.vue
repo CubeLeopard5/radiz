@@ -1,10 +1,10 @@
 <template>
     <div>
-        <RadizButton text="Login" @onClick="visible = true"/>
-        <a-modal v-model:visible="visible" :title="'Login' + ': ' + errMessage" @ok="handleOk"
-            :style="{ '--bg-error': (error) ? '#FF4D4D' : '#13850a' }" :class="(error) ? 'login-failure' : ''"
+        <RadizButton text="Register" @onClick="visible = true"/>
+        <a-modal v-model:visible="visible" :title="'register' + ': ' + errMessage" @ok="handleOk"
+            :style="{ '--bg-error': (error) ? '#FF4D4D' : '#13850a' }" :class="(error) ? 'register-failure' : ''"
             :footer="null">
-            <a-form :model="formState" name="normal_login" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+            <a-form :model="formState" name="normal_register" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
                 <a-form-item :label="'Email'" name="email" :rules="[
                     {
                         required: true,
@@ -18,6 +18,13 @@
                     <a-input v-model:value="formState.email">
                         <template #prefix>
                             <MailOutlined/>
+                        </template>
+                    </a-input>
+                </a-form-item>
+                <a-form-item :label="'Username'" name="username" :rules="[{ required: true, message: 'Please enter your username' }]">
+                    <a-input v-model:value="formState.username">
+                        <template #prefix>
+                            <UserOutlined/>
                         </template>
                     </a-input>
                 </a-form-item>
@@ -41,16 +48,18 @@
 
 <script lang="ts">
 import { defineComponent, reactive } from 'vue';
-import { MailOutlined, LockOutlined } from '@ant-design/icons-vue';
+import { MailOutlined, UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
 interface FormState {
     email: string;
+    username: string;
     password: string;
 };
 
 export default defineComponent({
     components: {
         MailOutlined,
+        UserOutlined,
         LockOutlined,
     },
     setup() {
@@ -58,6 +67,7 @@ export default defineComponent({
         const router = useRouter();
         const formState = reactive<FormState>({
             email: '',
+            username: '',
             password: '',
         });
         const visible = ref<boolean>(false);
@@ -65,7 +75,7 @@ export default defineComponent({
         let errMessage = ref<string>('');
 
         const handleOk = async() => {
-            const response = await request.login(formState.password, formState.email);
+            const response = await request.register(formState.username, formState.password, formState.email);
             if (!response.token) {
                 errMessage.value = response.response;
                 error.value = true;
@@ -79,13 +89,14 @@ export default defineComponent({
         };
 
         const checkInputs = () => {
-            if (!formState.email || !formState.password) {
+            if (!formState.email || !formState.password || !formState.username) {
                 return true;
             }
             return false;
         };
 
         const resetForm = () => {
+            formState.username = '',
             formState.email = '';
             formState.password = '';
         };
@@ -137,7 +148,7 @@ export default defineComponent({
     justify-content: space-between;
 }
 
-.login-failure {
+.register-failure {
 	animation-name: shakeError;
 	animation-fill-mode: forwards;
 	animation-duration: 600ms;

@@ -1,7 +1,6 @@
 <template>
-    <div>
-        <HeaderLogin/>
-        <div style="display: flex; flex-direction: row; justify-content: space-between;">
+    <div class="header-container">
+        <div class="switch-group">
             <a-switch class="switch-theme" v-model:checked="state.checkedL" @change="(e) => { (e == true) ? $i18n.locale = 'fr' : $i18n.locale = 'en'; }">
                 <template #checkedChildren>
                     <span> FR </span>
@@ -19,6 +18,10 @@
                 </template>
             </a-switch>
         </div>
+        <div class="buttons-group">
+            <HeaderLogin/>
+            <HeaderRegister/>
+        </div>
     </div>
 </template>
 
@@ -32,6 +35,25 @@ const state = reactive({
 </script>
 
 <style scoped>
+.buttons-group {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+}
+
+.header-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch-group {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+}
+
 .switch-theme {
     background: var(--color-primary);
 }

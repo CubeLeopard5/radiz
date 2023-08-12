@@ -40,8 +40,25 @@ export const useRequest = () => {
         return response;
     };
 
+    const register = async(username: string, password: string, email: string) => {
+        const response = await sendRequestToServer({
+            method: "POST",
+            endpoint: `register`,
+            body: JSON.stringify({
+                username,
+                password,
+                email,
+            })
+        });
+        if (response.token) {
+            store.setAccessToken(response.token);
+        }
+        return response;
+    };
+
     return {
         sendRequestToServer,
         login,
+        register,
     }
 };
