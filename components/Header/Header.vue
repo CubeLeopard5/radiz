@@ -28,6 +28,9 @@
 
 <script lang="ts" setup>
 import { reactive } from 'vue';
+import { useMainStore } from '~/store/main';
+
+const store = useMainStore();
 
 const state = reactive({
     checkedT: true,
@@ -37,6 +40,7 @@ const state = reactive({
 const handleOk = () => {
     const router = useRouter();
     localStorage.setItem('authToken', '');
+    store.setConnectedUser({});
     router.push({ path: '/' });
 }
 </script>
