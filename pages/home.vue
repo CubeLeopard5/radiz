@@ -19,6 +19,12 @@
         <a-button @click="subredditsPost = []">
             come back subreddits
         </a-button>
+        <a-input v-model:value="search" placeholder="Basic usage" @change="searchRedditsAuto" @pressEnter="searchReddits"/>
+        <div v-for="el, i in listSubreddits" :key="i">
+            <div @click="setSubredditPosts(el)">
+                {{ el }}
+            </div>
+        </div>
         <div class="subreddit-container">
             <div v-if="subredditsPost.length == 0">
                 <div v-for="subreddit, i in subredditList" :key="i" class="subreddits-list">
@@ -54,6 +60,10 @@ import { ref } from 'vue';
 let subredditList = ref([]);
 
 let subredditsPost = ref([]);
+
+let search = ref('');
+
+let listSubreddits = ref([]);
 
 const request = useRequest();
 
@@ -121,6 +131,50 @@ const setSubredditPost = async(i) => {
     });
     console.log(response);
     subredditsPost.value = response.data.children;
+};
+
+const setSubredditPosts = async(el) => {
+    subredditsPost.value = [];
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: `reddit/subreddit_posts`,
+        accessToken: true,
+        body: JSON.stringify({
+            subredditName: el,
+        }),
+    });
+    console.log(response);
+    subredditsPost.value = response.data.children;
+}
+
+const searchReddits = async() => {
+    listSubreddits.value = [];
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: "reddit/search_subreddits",
+        accessToken: true,
+        body: JSON.stringify({
+            search: search.value,
+        }),
+    });
+    console.log(response);
+    listSubreddits.value = response.names;
+};
+
+const searchRedditsAuto = async() => {
+    listSubreddits.value = [];
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: "reddit/search_subreddits_autocomplete",
+        accessToken: true,
+        body: JSON.stringify({
+            search: search.value,
+        }),
+    });
+    console.log(response);
+    response.data.children.forEach(el => {
+        listSubreddits.value.push(el.data.display_name);
+    });
 };
 
 /*definePageMeta({
