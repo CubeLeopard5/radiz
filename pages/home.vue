@@ -1,9 +1,9 @@
 <template>
     <div class="home-container">
         Hello
-        <a-button @click="auth2">
-            connect
-        </a-button>
+        <NuxtLink to="/services">
+            Services
+        </NuxtLink>
         <a-button @click="getInfo">
             get info
         </a-button>
@@ -25,7 +25,7 @@
                 {{ el }}
             </div>
         </div>
-        <div class="subreddit-container">
+        <div class="subreddit-container" @scroll="onScroll">
             <div v-if="subredditsPost.length == 0">
                 <div v-for="subreddit, i in subredditList" :key="i" class="subreddits-list">
                     <div class="subreddit-card" @click="setSubredditPost(i)">
@@ -67,10 +67,13 @@ let listSubreddits = ref([]);
 
 const request = useRequest();
 
-const auth2 = () => {
-    navigateTo(`http://localhost:8000/auth/reddit`, {
-        external: true
-    });
+let nextTarget = ref('');
+let nameChosen = ref('');
+
+const onScroll = ({ target: { scrollTop, clientHeight, scrollHeight }}) => {
+    if (scrollTop + clientHeight >= scrollHeight) {
+        setSubredditPostAgain();
+    }
 };
 
 const getInfo = async() => {
@@ -119,6 +122,21 @@ const getSubreddits = async() => {
     subredditList.value = response.data.children;
 };
 
+const setSubredditPostAgain = async() => {
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: `reddit/subreddit_posts`,
+        accessToken: true,
+        body: JSON.stringify({
+            subredditName: nameChosen.value,
+            after: nextTarget.value
+        }),
+    });
+    console.log(response);
+    subredditsPost.value = subredditsPost.value.concat(response.data.children);
+    nextTarget.value = response.data.after;
+};
+
 const setSubredditPost = async(i) => {
     subredditsPost.value = [];
     const response = await request.sendRequestToServer({
@@ -131,6 +149,8 @@ const setSubredditPost = async(i) => {
     });
     console.log(response);
     subredditsPost.value = response.data.children;
+    nameChosen.value = subredditList.value[i].data.display_name;
+    nextTarget.value = response.data.after;
 };
 
 const setSubredditPosts = async(el) => {
@@ -145,6 +165,8 @@ const setSubredditPosts = async(el) => {
     });
     console.log(response);
     subredditsPost.value = response.data.children;
+    nextTarget.value = response.data.after;
+    nameChosen.value = el;
 }
 
 const searchReddits = async() => {
