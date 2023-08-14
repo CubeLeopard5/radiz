@@ -76,6 +76,9 @@ export default defineComponent({
                 setTimeout(function(){ 
                     printIcon.value = true; 
                 }, printIconDuration.value);
+            } else {
+                authValidated.value = false;
+                localStorage.setItem(`${props.data.title}Service`, "");
             }
         };
 
