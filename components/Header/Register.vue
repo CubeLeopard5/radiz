@@ -1,7 +1,7 @@
 <template>
     <div>
         <RadizButton :text="$t('header.register.text')" @onClick="visible = true"/>
-        <a-modal v-model:visible="visible" :title="$t('header.register.text') + ': ' + errMessage" @ok="handleOk"
+        <a-modal v-model:visible="visible" :title="$t('header.register.text') + ': ' + errMessage"
             :style="{ '--bg-error': (error) ? '#FF4D4D' : '#13850a' }" :class="(error) ? 'register-failure' : ''"
             :footer="null">
             <a-form :model="formState" name="normal_register" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
@@ -48,7 +48,7 @@
                 <a-form-item :wrapper-col="{ offset: 4, span: 20 }">
                     <div class="group-button-log-can">
                         <RadizButtonError :text="$t('header.register.buttons.cancel')" @onClick="resetForm"/>
-                        <RadizButton :text="$t('header.register.buttons.submit')" @onClick="handleOk" :disabled="checkInputs()"/>
+                        <RadizButton :text="$t('header.register.buttons.submit')" @onClick="sendRegister" :disabled="checkInputs()"/>
                     </div>
                 </a-form-item>
             </a-form>
@@ -86,7 +86,7 @@ export default defineComponent({
         let error = ref<boolean>(false);
         let errMessage = ref<string>('');
 
-        const handleOk = async() => {
+        const sendRegister = async() => {
             const response = await request.register(formState.username, formState.password, formState.email);
             if (!response.token) {
                 errMessage.value = response.response;
@@ -120,7 +120,7 @@ export default defineComponent({
             visible,
             error,
             errMessage,
-            handleOk,
+            sendRegister,
             checkInputs,
             resetForm,
         }

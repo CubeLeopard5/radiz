@@ -1,9 +1,5 @@
 <template>
     <div class="services-container">
-        Services
-        <NuxtLink to="/home">
-            Back Home
-        </NuxtLink>
         <div class="services">
             <div v-for="item, i in listServices" :key="i" class="list-services">
                 <ServicesItem :data="item"/>
@@ -42,9 +38,7 @@ export default defineComponent({
 .services {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(10, 226px);
-    height: 91vh;
-    overflow-y: scroll;
+    grid-template-rows: repeat(3, 226px);
 }
 
 .list-services {

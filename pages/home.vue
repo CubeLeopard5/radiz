@@ -1,9 +1,6 @@
 <template>
     <div class="home-container">
         Hello
-        <NuxtLink to="/services">
-            Services
-        </NuxtLink>
         <a-button @click="getInfo">
             get info
         </a-button>
@@ -82,7 +79,6 @@ const getInfo = async() => {
         endpoint: `reddit/me`,
         accessToken: true,
     });
-    console.log(response);
 };
 
 const sendMessage = async() => {
@@ -96,7 +92,6 @@ const sendMessage = async() => {
             text: "jkkqj qsh qkhskq"
         }),
     });
-    console.log(response);
 }
 
 const createPost = async() => {
@@ -108,8 +103,7 @@ const createPost = async() => {
             title: "My_title_2",
             description: "Ono otre dex ription",
         }),
-    });
-    console.log(response);
+    });   
 }
 
 const getSubreddits = async() => {
@@ -118,7 +112,6 @@ const getSubreddits = async() => {
         endpoint: `reddit/my_subreddits`,
         accessToken: true,
     });
-    console.log(response);
     subredditList.value = response.data.children;
 };
 
@@ -132,7 +125,6 @@ const setSubredditPostAgain = async() => {
             after: nextTarget.value
         }),
     });
-    console.log(response);
     subredditsPost.value = subredditsPost.value.concat(response.data.children);
     nextTarget.value = response.data.after;
 };
@@ -147,7 +139,6 @@ const setSubredditPost = async(i) => {
             subredditName: subredditList.value[i].data.display_name,
         }),
     });
-    console.log(response);
     subredditsPost.value = response.data.children;
     nameChosen.value = subredditList.value[i].data.display_name;
     nextTarget.value = response.data.after;
@@ -163,7 +154,6 @@ const setSubredditPosts = async(el) => {
             subredditName: el,
         }),
     });
-    console.log(response);
     subredditsPost.value = response.data.children;
     nextTarget.value = response.data.after;
     nameChosen.value = el;
@@ -179,7 +169,6 @@ const searchReddits = async() => {
             search: search.value,
         }),
     });
-    console.log(response);
     listSubreddits.value = response.names;
 };
 
@@ -193,7 +182,6 @@ const searchRedditsAuto = async() => {
             search: search.value,
         }),
     });
-    console.log(response);
     response.data.children.forEach(el => {
         listSubreddits.value.push(el.data.display_name);
     });

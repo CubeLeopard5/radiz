@@ -68,7 +68,6 @@ export default defineComponent({
                     serviceName: props.data.title.toLowerCase(),
                 }),
             });
-            console.log(response);
             if (response.result == true) {
                 authValidated.value = true;
                 localStorage.setItem(`${props.data.title}Service`, "true");
@@ -91,7 +90,6 @@ export default defineComponent({
                     serviceName: props.data.title.toLowerCase(),
                 }),
             });
-            console.log(response);
             if (response.result == true) {
                 authValidated.value = false;
                 localStorage.setItem(`${props.data.title}Service`, "");

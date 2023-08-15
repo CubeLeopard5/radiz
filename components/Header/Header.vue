@@ -19,9 +19,11 @@
             </a-switch>
         </div>
         <div class="buttons-group">
-            <HeaderLogin/>
-            <HeaderRegister/>
-            <RadizButton text="logout" @onClick="handleOk"/>
+            <HeaderLogin v-if="!store.connectedUser.id"/>
+            <HeaderRegister v-if="!store.connectedUser.id"/>
+            <RadizButton text="Home" @onClick="goToHome"/>
+            <RadizButton text="Services" @onClick="goToServices"/>
+            <RadizButton text="Logout" @onClick="logout"/>
         </div>
     </div>
 </template>
@@ -31,18 +33,26 @@ import { reactive } from 'vue';
 import { useMainStore } from '~/store/main';
 
 const store = useMainStore();
+const router = useRouter();
 
 const state = reactive({
     checkedT: true,
     checkedL: true,
 });
 
-const handleOk = () => {
-    const router = useRouter();
+const logout = () => {
     localStorage.setItem('authToken', '');
     store.setConnectedUser({});
     router.push({ path: '/' });
-}
+};
+
+const goToServices = () => {
+    router.push({ path: '/services' });
+};
+
+const goToHome = () => {
+    router.push({ path: '/home' });
+};
 </script>
 
 <style scoped>
@@ -58,6 +68,7 @@ const handleOk = () => {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
 }
 
 .switch-group {
