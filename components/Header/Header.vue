@@ -21,9 +21,9 @@
         <div class="buttons-group">
             <HeaderLogin v-if="!store.connectedUser.id"/>
             <HeaderRegister v-if="!store.connectedUser.id"/>
-            <RadizButton text="Home" @onClick="goToHome"/>
-            <RadizButton text="Services" @onClick="goToServices"/>
-            <RadizButton text="Logout" @onClick="logout"/>
+            <RadizButton text="Home" @onClick="goToHome" v-if="store.connectedUser.id"/>
+            <RadizButton text="Comptes" @onClick="goToComptes" v-if="store.connectedUser.id"/>
+            <RadizButton text="Logout" @onClick="logout" v-if="store.connectedUser.id"/>
         </div>
     </div>
 </template>
@@ -46,8 +46,8 @@ const logout = () => {
     router.push({ path: '/' });
 };
 
-const goToServices = () => {
-    router.push({ path: '/services' });
+const goToComptes = () => {
+    router.push({ path: '/comptes' });
 };
 
 const goToHome = () => {

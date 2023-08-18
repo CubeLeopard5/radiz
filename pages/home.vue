@@ -1,7 +1,36 @@
 <template>
     <div class="home-container">
-        Hello
-        <a-button @click="getInfo">
+        hello
+        <!--div style="display: flex; flex-direction: row; gap: 12px;">
+            <div v-for="el, i in selection.services" :key="i">
+                <span v-if="el == -1" @click="setSelected(-1, i)"> Services </span>
+                <span v-if="el == 0" @click="setSelected(0, i)"> Messages 0 </span>
+                <span v-if="el == 1" @click="setSelected(1, i)"> Messages 1 </span>
+                <span v-if="el == 2" @click="setSelected(2, i)"> Messages 2 </span>
+            </div>
+            <span @click="addPlus"> + </span>
+        </div>
+        <div v-if="selection.services[selection.selected] == -1" class="services">
+            <div v-for="item, i in listServices" :key="i" class="list-services" @click="serviceSelection(i)">
+                <ServicesItem :data="item"/>
+            </div>
+        </div>
+        <div v-if="selection.services[selection.selected] == 0">
+            MESSAGE 0
+        </div>
+        <div v-if="selection.services[selection.selected] == 1">
+            MESSAGE 1
+        </div>
+        <div v-if="selection.services[selection.selected] == 2">
+            MESSAGE 2
+        </div-->
+
+
+
+
+
+
+        <!--a-button @click="getInfo">
             get info
         </a-button>
         <a-button @click="sendMessage">
@@ -33,28 +62,126 @@
                 </div>
             </div>
             <div v-for="subredditpost, i in subredditsPost" :key="i" class="subreddits-list">
-                <div class="subreddit-card">
-                    <span> {{ subredditpost.data.author }} </span>
-                    <span> {{ subredditpost.data.title }} </span>
-                    <div v-html="subredditpost.data.selftext_html"/>
-                    <div v-if="subredditpost.data.preview">
-                        <div v-if="subredditpost.data.preview.images[0].source.width < 300">
-                            <img :src="subredditpost.data.preview.images[0].source.url" alt="" :style="{ 'width': `${subredditpost.data.preview.images[0].source.width}px`, 'border-radius': '12px' }">
-                        </div>
-                        <div v-else>
-                            <img :src="subredditpost.data.preview.images[0].source.url" alt="" style="width: 100%; border-radius: 12px;">
-                        </div>
-                    </div>
+                <SubredditPost :data="subredditpost.data"/>
+            </div>
+        </div-->
+
+
+
+        <div class="subreddit-container" v-if="ready == true">
+            <div v-for="subRedditPost, i in redditFeed" :key="i" class="subreddits-list">
+                <SubredditPost :data="subRedditPost.data"/>
+            </div>
+        </div>
+        <div class="skeleton-container" v-else>
+            <div class="skeleton-list" v-for="i in 5" :key="i">
+                <div class="skeleton">
+                    <a-skeleton active/>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 
-let subredditList = ref([]);
+const request = useRequest();
+const redditFeed = ref([]);
+const ready = ref(false);
+
+const sortByCreatedUTC = (a, b) => {
+    if (a.data.created_utc < b.data.created_utc) {
+        return 1;
+    }
+    if (a.data.created_utc > b.data.created_utc) {
+        return -1;
+    }
+    return 0;
+};
+
+const getSubreddits = async() => {
+    const response = await request.sendRequestToServer({
+        method: "GET",
+        endpoint: `reddit/my_subreddits`,
+        accessToken: true,
+    });
+    if (response.data) {
+        for (let i = 0; i < response.data.children.length; i++) {
+            await getPostsOfSubReddit(response.data.children[i].data.display_name);
+        }
+    }
+};
+
+const getPostsOfSubReddit = async(subRedditName) => {
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: `reddit/subreddit_posts`,
+        accessToken: true,
+        body: JSON.stringify({
+            subredditName: subRedditName,
+        }),
+    });
+    redditFeed.value = redditFeed.value.concat(response.data.children);
+};
+
+onMounted(async() => {
+    redditFeed.value = [];
+    console.log("A");
+    await getSubreddits();
+    console.log("B");
+    redditFeed.value = redditFeed.value.sort(sortByCreatedUTC);
+    console.log("C");
+    ready.value = true;
+});
+
+/*const listServices = ref([
+    {
+        title: 'Messages',
+        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
+    },
+    {
+        title: 'Messages 1',
+        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
+    },
+    {
+        title: 'Messages 2',
+        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
+    }
+]);
+
+const selection = reactive({
+    services: [-1],
+    selected: 0,
+});
+
+const serviceSelection = (i) => {
+    if (selection.services[selection.services.length - 1] == -1) {
+        selection.services[selection.services.length - 1] = i;
+    }
+    selection.selected = selection.services.length - 1;
+};
+
+const addPlus = () => {
+    if (selection.services[selection.services.length - 1] == -1) {
+        return;
+    }
+    selection.services.push(-1);
+    selection.selected = selection.services.length - 1;
+};
+
+const setSelected = (val, idx) => {
+    selection.selected = idx;
+};*/
+
+
+
+
+
+
+
+/*let subredditList = ref([]);
 
 let subredditsPost = ref([]);
 
@@ -157,6 +284,7 @@ const setSubredditPosts = async(el) => {
     subredditsPost.value = response.data.children;
     nextTarget.value = response.data.after;
     nameChosen.value = el;
+    listSubreddits.value = [];
 }
 
 const searchReddits = async() => {
@@ -185,7 +313,7 @@ const searchRedditsAuto = async() => {
     response.data.children.forEach(el => {
         listSubreddits.value.push(el.data.display_name);
     });
-};
+};*/
 
 /*definePageMeta({
     middleware: 'auth-user',
@@ -198,6 +326,23 @@ const searchRedditsAuto = async() => {
     background-image: url("@/assets/plage_background.jpg");
     background-size: cover;
 }
+
+/*.services {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 226px);
+}
+
+.list-services {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.services::-webkit-scrollbar {
+    display: none;
+}*/
 
 .subreddit-container {
     margin-top: 24px;
@@ -215,14 +360,22 @@ const searchRedditsAuto = async() => {
     align-items: center;
 }
 
-.subreddit-card {
-    background: var(--bg);
-    width: 80%;
-    border-radius: 12px;
-    margin: 12px;
+.skeleton-container {
+    margin-top: 24px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.skeleton-list {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+}
+
+.skeleton {
+    width: 80%;
+    background: var(--bg);
 }
 </style>
