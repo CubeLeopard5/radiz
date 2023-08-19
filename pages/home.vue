@@ -151,6 +151,17 @@ const getPostsOfSubReddit = async(subRedditName) => {
             next: (obj != null ? obj.next : null),
         }),
     });
+    const result = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: `reddit/reddit_user_posts`,
+        accessToken: true,
+        body: JSON.stringify({
+            redditUser: subRedditName,
+            limit: 4,
+            next: (obj != null ? obj.next : null),
+        }),
+    });
+    console.log(result)
     subRedditsInfo.find((o, i) => {
         if (o.subRedditName === subRedditName) {
             subRedditsInfo[i] = { subRedditName: subRedditName, next: response.data.after };

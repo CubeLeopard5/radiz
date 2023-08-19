@@ -89,7 +89,7 @@ const handleInput = (value: KeyboardEvent) => {
     console.log("INPUT");
     if (value.key == "Backspace") {
         research.value = research.value.slice(0, -1);
-    } else {
+    } else if (value.key != "Shift") {
         research.value += value.key;
     }
     searchRedditsAuto(research.value);
@@ -112,6 +112,26 @@ const searchRedditsAuto = async(research: string) => {
         });
     });
     options.value = tab;
+    searchRedditUsers(research);
+};
+
+const searchRedditUsers = async(research: string) => {
+    let tab: Array<object> = [];
+    const response = await request.sendRequestToServer({
+        method: "POST",
+        endpoint: "reddit/search_user",
+        accessToken: true,
+        body: JSON.stringify({
+            search: research,
+        }),
+    });
+    response.data.children.forEach(el => {
+        tab.push({
+            value: el.data.name,
+            label: el.data.name
+        });
+    });
+    options.value = options.value?.concat(tab);
 };
 </script>
 
