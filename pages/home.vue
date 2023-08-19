@@ -68,7 +68,7 @@
 
 
 
-        <div class="subreddit-container" v-if="ready == true">
+        <div class="subreddit-container" v-if="ready == true" @scroll="onScroll">
             <div v-for="subRedditPost, i in redditFeed" :key="i" class="subreddits-list">
                 <SubredditPost :data="subRedditPost.data"/>
             </div>
@@ -90,6 +90,7 @@ import { ref, reactive, onMounted } from 'vue';
 const request = useRequest();
 const redditFeed = ref([]);
 const ready = ref(false);
+const subRedditsInfo = reactive([]);
 
 const sortByCreatedUTC = (a, b) => {
     if (a.data.created_utc < b.data.created_utc) {
@@ -102,37 +103,69 @@ const sortByCreatedUTC = (a, b) => {
 };
 
 const getSubreddits = async() => {
+    let shuffled = [];
+    let selectedSubReddit = [];
+    let rtn = [];
     const response = await request.sendRequestToServer({
         method: "GET",
         endpoint: `reddit/my_subreddits`,
         accessToken: true,
     });
     if (response.data) {
-        for (let i = 0; i < response.data.children.length; i++) {
-            await getPostsOfSubReddit(response.data.children[i].data.display_name);
-        }
+        response.data.children.forEach(el => {
+            if (!subRedditsInfo.find(e => e.subRedditName === el.data.display_name)) {
+                subRedditsInfo.push({
+                    subRedditName: el.data.display_name,
+                    next: null,
+                });
+            }
+        });
     }
+    if (subRedditsInfo.length > 5) {
+        shuffled = subRedditsInfo.sort(() => 0.5 - Math.random());
+        selectedSubReddit = shuffled.slice(0, 5);
+    }
+    for (let i = 0; i < selectedSubReddit.length; i++) {
+        rtn = rtn.concat(await getPostsOfSubReddit(selectedSubReddit[i].subRedditName));
+    }
+    console.log(rtn);
+    return rtn;
 };
 
 const getPostsOfSubReddit = async(subRedditName) => {
+    let obj = subRedditsInfo.find(o => o.subRedditName === subRedditName);
     const response = await request.sendRequestToServer({
         method: "POST",
         endpoint: `reddit/subreddit_posts`,
         accessToken: true,
         body: JSON.stringify({
-            subredditName: subRedditName,
+            subRedditName: subRedditName,
+            limit: 4,
+            next: obj.next,
         }),
     });
-    redditFeed.value = redditFeed.value.concat(response.data.children);
+    subRedditsInfo.find((o, i) => {
+        if (o.subRedditName === subRedditName) {
+            subRedditsInfo[i] = { subRedditName: subRedditName, next: response.data.after };
+            return true;
+        }
+    });
+    return response.data.children;
+};
+
+const onScroll = async({ target: { scrollTop, clientHeight, scrollHeight }}) => {
+    let tab = [];
+    if (scrollTop + clientHeight >= scrollHeight) {
+        tab = await getSubreddits();
+        tab = tab.sort(sortByCreatedUTC);
+        redditFeed.value = redditFeed.value.concat(tab);
+    }
 };
 
 onMounted(async() => {
     redditFeed.value = [];
-    console.log("A");
-    await getSubreddits();
-    console.log("B");
+    redditFeed.value = await getSubreddits();
     redditFeed.value = redditFeed.value.sort(sortByCreatedUTC);
-    console.log("C");
     ready.value = true;
 });
 
