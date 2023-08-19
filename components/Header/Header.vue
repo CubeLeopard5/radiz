@@ -18,24 +18,17 @@
                 </template>
             </a-switch>
         </div>
-        <div style="display: flex;
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;">
-            <!--a-input v-model:value="search" placeholder="Search" @change="searchRedditsAuto" @pressEnter="searchReddits"/>
-            <div v-for="el, i in listSubreddits" :key="i">
-                <div>
-                    {{ el }}
-                </div>
-            </div-->
+        <div v-if="store.connectedUser.id" class="search-bar">
             <a-select
                 v-model:value="sr"
                 mode="multiple"
-                style="width: 50%"
-                placeholder="multiple Mode"
+                style="width: 50%; border-color: red;"
+                placeholder="Research"
                 :options="options"
                 @change="handleChange"
                 @inputKeyDown="handleInput"
+                :notFoundContent="null"
+                @blur="research = ''"
             />
         </div>
         <div class="buttons-group">
@@ -86,7 +79,6 @@ const handleChange = () => {
 };
 
 const handleInput = (value: KeyboardEvent) => {
-    console.log("INPUT");
     if (value.key == "Backspace") {
         research.value = research.value.slice(0, -1);
     } else if (value.key != "Shift") {
@@ -112,7 +104,7 @@ const searchRedditsAuto = async(research: string) => {
         });
     });
     options.value = tab;
-    searchRedditUsers(research);
+    //searchRedditUsers(research);
 };
 
 const searchRedditUsers = async(research: string) => {
@@ -135,7 +127,7 @@ const searchRedditUsers = async(research: string) => {
 };
 </script>
 
-<style scoped>
+<style>
 .buttons-group {
     display: flex;
     flex-direction: row;
@@ -151,6 +143,13 @@ const searchRedditUsers = async(research: string) => {
     height: 100%;
 }
 
+.search-bar {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+}
+
 .switch-group {
     display: flex;
     flex-direction: row;
@@ -159,5 +158,14 @@ const searchRedditUsers = async(research: string) => {
 
 .switch-theme {
     background: var(--color-primary);
+}
+
+.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-selectcustomize-input) .ant-select-selector {
+    border-color: var(--border-color);
+    box-shadow: none !important;
+}
+
+.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    border-color: var(--border-color) !important;
 }
 </style>
