@@ -6,6 +6,7 @@ export const useMainStore = defineStore({
 		return {
 			accessToken: "",
 			connectedUser: {},
+			research: [],
 		}
 	},
 	actions: {

@@ -86,7 +86,9 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useMainStore } from '~/store/main';
 
+const store = useMainStore();
 const request = useRequest();
 const redditFeed = ref([]);
 const ready = ref(false);
@@ -128,12 +130,17 @@ const getSubreddits = async() => {
     for (let i = 0; i < selectedSubReddit.length; i++) {
         rtn = rtn.concat(await getPostsOfSubReddit(selectedSubReddit[i].subRedditName));
     }
-    console.log(rtn);
     return rtn;
 };
 
 const getPostsOfSubReddit = async(subRedditName) => {
     let obj = subRedditsInfo.find(o => o.subRedditName === subRedditName);
+    if (!obj) {
+        subRedditsInfo.push({
+            subRedditName: subRedditName,
+            next: null,
+        });
+    }
     const response = await request.sendRequestToServer({
         method: "POST",
         endpoint: `reddit/subreddit_posts`,
@@ -141,7 +148,7 @@ const getPostsOfSubReddit = async(subRedditName) => {
         body: JSON.stringify({
             subRedditName: subRedditName,
             limit: 4,
-            next: obj.next,
+            next: (obj != null ? obj.next : null),
         }),
     });
     subRedditsInfo.find((o, i) => {
@@ -156,11 +163,32 @@ const getPostsOfSubReddit = async(subRedditName) => {
 const onScroll = async({ target: { scrollTop, clientHeight, scrollHeight }}) => {
     let tab = [];
     if (scrollTop + clientHeight >= scrollHeight) {
-        tab = await getSubreddits();
-        tab = tab.sort(sortByCreatedUTC);
-        redditFeed.value = redditFeed.value.concat(tab);
+        if (store.research.length == 0) {
+            tab = await getSubreddits();
+            tab = tab.sort(sortByCreatedUTC);
+            redditFeed.value = redditFeed.value.concat(tab);
+        } else {
+            for (let i = 0; i < store.research.length; i++) {
+                tab = tab.concat(await getPostsOfSubReddit(store.research[i]));
+            }
+            tab = tab.sort(sortByCreatedUTC);
+            redditFeed.value = redditFeed.value.concat(tab);
+        }
     }
 };
+
+watch(() => store.research, async(newValue) => {
+    ready.value = false;
+    redditFeed.value = [];
+    subRedditsInfo.length = 0;
+    
+    for (let i = 0; i < newValue.length; i++) {
+        redditFeed.value = redditFeed.value.concat(await getPostsOfSubReddit(newValue[i]));
+    }
+    
+    redditFeed.value = redditFeed.value.sort(sortByCreatedUTC);
+    ready.value = true;
+});
 
 onMounted(async() => {
     redditFeed.value = [];
