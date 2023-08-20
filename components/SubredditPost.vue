@@ -13,20 +13,44 @@
                 <span> {{ showDate(data.created_utc) }} </span>
             </div>
         </div>
-        <div v-html="data.selftext_html" style="padding: 18px; text-align: justify;"/>
-        <div v-if="data.preview" style="padding: 24px;">
-            <div v-if="data.preview.images[0].source.width < 300">
-                <img :src="data.preview.images[0].source.url" alt="" :style="{ 'width': `${data.preview.images[0].source.width}px`, 'border-radius': '12px' }">
-            </div>
-            <div v-else>
-                <img :src="data.preview.images[0].source.url" alt="" style="width: 100%; border-radius: 12px;">
-            </div>
-        </div>
+        <a-row>
+            <a-col :span="6" >
+                <div class="card-col" style="margin-top: 24px;">
+                    <div v-if="data.link_flair_richtext.length > 0">
+                        <div v-for="el, i in data.link_flair_richtext" :key="i">
+                            <a-tag color="#13850a"> {{ el.t }} </a-tag>
+                        </div>
+                    </div>
+                    <span> {{ data.ups }} up vote(s) </span>
+                    <span> {{ nbComment }} comment(s) </span>
+                </div>
+            </a-col>
+            <a-col :span="12">
+                <div class="card-col">
+                    <div v-html="data.selftext_html" style="padding: 18px; text-align: justify;"/>
+                    <div v-if="data.preview" style="padding: 24px;">
+                        <div v-if="data.preview.images[0].source.width < 1000">
+                            <img :src="data.preview.images[0].source.url" alt="" :style="{ 'width': `${data.preview.images[0].source.width}px`, 'border-radius': '12px' }">
+                        </div>
+                        <div v-else>
+                            <img :src="data.preview.images[0].source.url" alt="" style="width: 100%; border-radius: 12px;">
+                        </div>
+                    </div>
+                </div>
+            </a-col>
+            <a-col :span="6">
+                <div class="card-col">
+                    <div v-for="com, i in listCommentsSource" :key="i">
+                        <div v-html="transformString(com.body_html)"/>
+                    </div>
+                </div>
+            </a-col>
+        </a-row>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 
 export default defineComponent({
     props: {
@@ -36,13 +60,53 @@ export default defineComponent({
         }
     },
     setup(props) {
+        const request = useRequest();
+        const nbComment = ref(0);
+        const listCommentsSource = ref([]);
         const showDate = (val: number) => {
             let date = new Date(val * 1000);
             let stringDate = date.toLocaleString();
             return stringDate;
         };
+        const countNbComments = (obj: object) => {
+            const propName = "kind";
+            const type = "t1";
+            if (propName in obj && obj[propName] == type){
+                nbComment.value++;
+                if (obj.data.replies != "") {
+                    obj.data.replies.data.children.forEach(el => {
+                        countNbComments(el);
+                    });
+                }
+            }
+        };
+        const transformString = (str: string) => {
+            return str.replaceAll('&gt;', '>').replaceAll('&lt;', '<').replaceAll('&amp;#39;', "\'").replaceAll("&amp;quot;", '"').replaceAll('\\', '');
+        }
+        onMounted(() => {
+            request.sendRequestToServer({
+                method: "POST",
+                endpoint: `reddit/get_post_comments`,
+                accessToken: true,
+                body: JSON.stringify({
+                    link: props.data.id,
+                    subredditName: props.data.subreddit
+                }),
+            }).then(response => {
+                response[1].data.children.forEach(el => {
+                    countNbComments(el);
+                    if (listCommentsSource.value.length < 5) {
+                        listCommentsSource.value.push(el.data);
+                    }
+                });
+            });
+        })
         return {
             showDate,
+            onMounted,
+            transformString,
+            nbComment,
+            listCommentsSource,
         }
     }
 });
@@ -54,9 +118,13 @@ export default defineComponent({
     width: 80%;
     border-radius: 12px;
     margin: 12px;
+}
+
+.card-col {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100%;
     gap: 12px;
 }
 

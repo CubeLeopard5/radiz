@@ -1,98 +1,49 @@
 <template>
     <div class="home-container">
-        hello
-        <!--div style="display: flex; flex-direction: row; gap: 12px;">
-            <div v-for="el, i in selection.services" :key="i">
-                <span v-if="el == -1" @click="setSelected(-1, i)"> Services </span>
-                <span v-if="el == 0" @click="setSelected(0, i)"> Messages 0 </span>
-                <span v-if="el == 1" @click="setSelected(1, i)"> Messages 1 </span>
-                <span v-if="el == 2" @click="setSelected(2, i)"> Messages 2 </span>
-            </div>
-            <span @click="addPlus"> + </span>
-        </div>
-        <div v-if="selection.services[selection.selected] == -1" class="services">
-            <div v-for="item, i in listServices" :key="i" class="list-services" @click="serviceSelection(i)">
-                <ServicesItem :data="item"/>
-            </div>
-        </div>
-        <div v-if="selection.services[selection.selected] == 0">
-            MESSAGE 0
-        </div>
-        <div v-if="selection.services[selection.selected] == 1">
-            MESSAGE 1
-        </div>
-        <div v-if="selection.services[selection.selected] == 2">
-            MESSAGE 2
-        </div-->
-
-
-
-
-
-
-        <!--a-button @click="getInfo">
-            get info
-        </a-button>
-        <a-button @click="sendMessage">
-            Send message
-        </a-button>
-        <a-button @click="createPost">
-            Create Post
-        </a-button>
-        <a-button @click="getSubreddits">
-            get Subreddits
-        </a-button>
-        <a-button @click="subredditsPost = []">
-            come back subreddits
-        </a-button>
-        <a-input v-model:value="search" placeholder="Basic usage" @change="searchRedditsAuto" @pressEnter="searchReddits"/>
-        <div v-for="el, i in listSubreddits" :key="i">
-            <div @click="setSubredditPosts(el)">
-                {{ el }}
-            </div>
-        </div>
-        <div class="subreddit-container" @scroll="onScroll">
-            <div v-if="subredditsPost.length == 0">
-                <div v-for="subreddit, i in subredditList" :key="i" class="subreddits-list">
-                    <div class="subreddit-card" @click="setSubredditPost(i)">
-                        <span> {{ subreddit.data.title }} </span>
-                        <span> {{ subreddit.data.description }} </span>
-                        <img :src="subreddit.data.community_icon" alt="">
-                    </div>
-                </div>
-            </div>
-            <div v-for="subredditpost, i in subredditsPost" :key="i" class="subreddits-list">
-                <SubredditPost :data="subredditpost.data"/>
-            </div>
-        </div-->
-
-
-
-        <div class="subreddit-container" v-if="ready == true" @scroll="onScroll">
+        <div class="subreddit-container" v-if="ready == true && noAccountConnected == false" @scroll="onScroll">
             <div v-for="subRedditPost, i in redditFeed" :key="i" class="subreddits-list">
                 <SubredditPost :data="subRedditPost.data"/>
             </div>
         </div>
-        <div class="skeleton-container" v-else>
-            <div class="skeleton-list" v-for="i in 5" :key="i">
+        <div class="skeleton-container" v-else-if="ready == false && noAccountConnected == false">
+            <div class="skeleton-list" v-for="i in 4" :key="i">
                 <div class="skeleton">
                     <a-skeleton active/>
                 </div>
             </div>
         </div>
-
+        <div class="no-account-container" v-if="noAccountConnected == true">
+            <div class="no-account-card">
+                <span> You don't have any account connected </span>
+                <RadizButton text="Comptes" @onClick="goToComptes"/>
+            </div>
+        </div>
+        <div class="load-new-posts" v-if="loadingNewPosts">
+            <a-spin :indicator="indicator" />
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, h } from 'vue';
 import { useMainStore } from '~/store/main';
+import { LoadingOutlined } from '@ant-design/icons-vue';
 
 const store = useMainStore();
 const request = useRequest();
 const redditFeed = ref([]);
 const ready = ref(false);
 const subRedditsInfo = reactive([]);
+const noAccountConnected = ref(false);
+const router = useRouter();
+const loadingNewPosts = ref(false);
+
+const indicator = h(LoadingOutlined, {
+    style: {
+        fontSize: '48px',
+    },
+    spin: true,
+});
 
 const sortByCreatedUTC = (a, b) => {
     if (a.data.created_utc < b.data.created_utc) {
@@ -102,6 +53,10 @@ const sortByCreatedUTC = (a, b) => {
         return -1;
     }
     return 0;
+};
+
+const goToComptes = () => {
+    router.push({ path: '/comptes' });
 };
 
 const getSubreddits = async() => {
@@ -122,6 +77,8 @@ const getSubreddits = async() => {
                 });
             }
         });
+    } else {
+        noAccountConnected.value = true;
     }
     if (subRedditsInfo.length > 5) {
         shuffled = subRedditsInfo.sort(() => 0.5 - Math.random());
@@ -163,6 +120,7 @@ const getPostsOfSubReddit = async(subRedditName) => {
 const onScroll = async({ target: { scrollTop, clientHeight, scrollHeight }}) => {
     let tab = [];
     if (scrollTop + clientHeight >= scrollHeight) {
+        loadingNewPosts.value = true;
         if (store.research.length == 0) {
             tab = await getSubreddits();
             tab = tab.sort(sortByCreatedUTC);
@@ -174,6 +132,7 @@ const onScroll = async({ target: { scrollTop, clientHeight, scrollHeight }}) => 
             tab = tab.sort(sortByCreatedUTC);
             redditFeed.value = redditFeed.value.concat(tab);
         }
+        loadingNewPosts.value = false;
     }
 };
 
@@ -197,188 +156,9 @@ onMounted(async() => {
     ready.value = true;
 });
 
-/*const listServices = ref([
-    {
-        title: 'Messages',
-        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
-    },
-    {
-        title: 'Messages 1',
-        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
-    },
-    {
-        title: 'Messages 2',
-        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Google_Messages_logo.svg/2048px-Google_Messages_logo.svg.png',
-    }
-]);
-
-const selection = reactive({
-    services: [-1],
-    selected: 0,
-});
-
-const serviceSelection = (i) => {
-    if (selection.services[selection.services.length - 1] == -1) {
-        selection.services[selection.services.length - 1] = i;
-    }
-    selection.selected = selection.services.length - 1;
-};
-
-const addPlus = () => {
-    if (selection.services[selection.services.length - 1] == -1) {
-        return;
-    }
-    selection.services.push(-1);
-    selection.selected = selection.services.length - 1;
-};
-
-const setSelected = (val, idx) => {
-    selection.selected = idx;
-};*/
-
-
-
-
-
-
-
-/*let subredditList = ref([]);
-
-let subredditsPost = ref([]);
-
-let search = ref('');
-
-let listSubreddits = ref([]);
-
-const request = useRequest();
-
-let nextTarget = ref('');
-let nameChosen = ref('');
-
-const onScroll = ({ target: { scrollTop, clientHeight, scrollHeight }}) => {
-    if (scrollTop + clientHeight >= scrollHeight) {
-        setSubredditPostAgain();
-    }
-};
-
-const getInfo = async() => {
-    const response = await request.sendRequestToServer({
-        method: "GET",
-        endpoint: `reddit/me`,
-        accessToken: true,
-    });
-};
-
-const sendMessage = async() => {
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: "reddit/send_message",
-        accessToken: true,
-        body: JSON.stringify({
-            to: "testCubeDev",
-            subject: "MeinSubjector",
-            text: "jkkqj qsh qkhskq"
-        }),
-    });
-}
-
-const createPost = async() => {
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: "reddit/create_publication",
-        accessToken: true,
-        body: JSON.stringify({
-            title: "My_title_2",
-            description: "Ono otre dex ription",
-        }),
-    });   
-}
-
-const getSubreddits = async() => {
-    const response = await request.sendRequestToServer({
-        method: "GET",
-        endpoint: `reddit/my_subreddits`,
-        accessToken: true,
-    });
-    subredditList.value = response.data.children;
-};
-
-const setSubredditPostAgain = async() => {
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: `reddit/subreddit_posts`,
-        accessToken: true,
-        body: JSON.stringify({
-            subredditName: nameChosen.value,
-            after: nextTarget.value
-        }),
-    });
-    subredditsPost.value = subredditsPost.value.concat(response.data.children);
-    nextTarget.value = response.data.after;
-};
-
-const setSubredditPost = async(i) => {
-    subredditsPost.value = [];
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: `reddit/subreddit_posts`,
-        accessToken: true,
-        body: JSON.stringify({
-            subredditName: subredditList.value[i].data.display_name,
-        }),
-    });
-    subredditsPost.value = response.data.children;
-    nameChosen.value = subredditList.value[i].data.display_name;
-    nextTarget.value = response.data.after;
-};
-
-const setSubredditPosts = async(el) => {
-    subredditsPost.value = [];
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: `reddit/subreddit_posts`,
-        accessToken: true,
-        body: JSON.stringify({
-            subredditName: el,
-        }),
-    });
-    subredditsPost.value = response.data.children;
-    nextTarget.value = response.data.after;
-    nameChosen.value = el;
-    listSubreddits.value = [];
-}
-
-const searchReddits = async() => {
-    listSubreddits.value = [];
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: "reddit/search_subreddits",
-        accessToken: true,
-        body: JSON.stringify({
-            search: search.value,
-        }),
-    });
-    listSubreddits.value = response.names;
-};
-
-const searchRedditsAuto = async() => {
-    listSubreddits.value = [];
-    const response = await request.sendRequestToServer({
-        method: "POST",
-        endpoint: "reddit/search_subreddits_autocomplete",
-        accessToken: true,
-        body: JSON.stringify({
-            search: search.value,
-        }),
-    });
-    response.data.children.forEach(el => {
-        listSubreddits.value.push(el.data.display_name);
-    });
-};*/
-
-/*definePageMeta({
+definePageMeta({
     middleware: 'auth-user',
-});*/
+});
 </script>
 
 <style scoped>
@@ -386,29 +166,13 @@ const searchRedditsAuto = async() => {
     height: 93.4vh;
     background-image: url("@/assets/plage_background.jpg");
     background-size: cover;
+    padding-top: 1px;
 }
-
-/*.services {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 226px);
-}
-
-.list-services {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
-.services::-webkit-scrollbar {
-    display: none;
-}*/
 
 .subreddit-container {
     margin-top: 24px;
     overflow-y: scroll;
-    height: 85vh;
+    height: 89vh;
 }
 
 .subreddit-container::-webkit-scrollbar {
@@ -438,5 +202,32 @@ const searchRedditsAuto = async() => {
 .skeleton {
     width: 80%;
     background: var(--bg);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.no-account-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.no-account-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 24px;
+    background: var(--bg);
+    border-radius: 12px;
+    width: 25%;
+    padding: 24px;
+}
+
+.load-new-posts {
+    position: absolute;
+    top: 90%;
+    left: calc(50% - 24px);
+    z-index: 1;
 }
 </style>
