@@ -16,7 +16,12 @@ const listcomptes = ref([
         title: 'Reddit',
         photo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bd/Reddit_Logo_Icon.svg/1200px-Reddit_Logo_Icon.svg.png',
         auth: 'http://localhost:8000/auth/reddit',
-    }
+    },
+    {
+        title: 'LinkedIn',
+        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/LinkedIn_icon_circle.svg/1200px-LinkedIn_icon_circle.svg.png',
+        auth: 'http://localhost:8000/auth/linkedin',
+    },
 ]);
 </script>
 

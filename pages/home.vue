@@ -59,6 +59,15 @@ const goToComptes = () => {
     router.push({ path: '/comptes' });
 };
 
+const getLinkedIn = async() => {
+    const response = await request.sendRequestToServer({
+        method: "GET",
+        endpoint: `linkedin/me`,
+        accessToken: true,
+    });
+    console.log(response);
+};
+
 const getSubreddits = async() => {
     let shuffled = [];
     let selectedSubReddit = [];
@@ -152,6 +161,7 @@ watch(() => store.research, async(newValue) => {
 });
 
 onMounted(async() => {
+    await getLinkedIn();
     redditFeed.value = [];
     redditFeed.value = await getSubreddits();
     redditFeed.value = redditFeed.value.sort(sortByCreatedUTC);
