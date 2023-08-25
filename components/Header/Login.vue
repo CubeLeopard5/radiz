@@ -27,7 +27,7 @@
                         message: $t('header.login.password.no-input')
                     }
                 ]">
-                    <a-input-password v-model:value="formState.password">
+                    <a-input-password v-model:value="formState.password" @pressEnter="sendLogin">
                         <template #prefix>
                             <LockOutlined/>
                         </template>

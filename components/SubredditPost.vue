@@ -27,7 +27,12 @@
             </a-col>
             <a-col :span="12">
                 <div class="card-col">
-                    <div v-html="data.selftext_html" style="padding: 18px; text-align: justify;"/>
+                    <div v-if="data.selftext_html || data?.preview?.images" v-html="data.selftext_html" style="padding: 18px; text-align: justify;"/>
+                    <div v-else-if="data.crosspost_parent_list">
+                        <div v-for="cross, i in data.crosspost_parent_list" :key="i" style="display: flex; flex-direction: row; justify-content: center;">
+                            <SubredditPost :data="cross"/>
+                        </div>
+                    </div>
                     <div v-if="data.preview" style="padding: 24px;">
                         <div v-if="data.preview.images[0].source.width < 1000">
                             <img :src="data.preview.images[0].source.url" alt="" :style="{ 'width': `${data.preview.images[0].source.width}px`, 'border-radius': '12px' }">
@@ -39,8 +44,8 @@
                 </div>
             </a-col>
             <a-col :span="6">
-                <div class="card-col">
-                    <div v-for="com, i in listCommentsSource" :key="i">
+                <div class="card-col" style="margin-top: 24px; display: flex; flex-direction: column; align-items: flex-start;">
+                    <div v-for="com, i in listCommentsSource" :key="i" style="margin-left: 6px;">
                         <div v-html="transformString(com.body_html)"/>
                     </div>
                 </div>
@@ -115,9 +120,17 @@ export default defineComponent({
 <style scoped>
 .card {
     background: var(--bg);
-    width: 80%;
+    width: 90%;
     border-radius: 12px;
     margin: 12px;
+    height: 100%;
+    max-height: 720px;
+    overflow-y: scroll;
+    word-break: break-word;
+}
+
+.card::-webkit-scrollbar {
+    display: none;
 }
 
 .card-col {
@@ -125,7 +138,13 @@ export default defineComponent({
     flex-direction: column;
     align-items: center;
     height: 100%;
+    max-height: 600px;
     gap: 12px;
+    overflow-y: scroll;
+}
+
+.card-col::-webkit-scrollbar {
+    display: none;
 }
 
 .card-header {

@@ -83,6 +83,8 @@ const getSubreddits = async() => {
     if (subRedditsInfo.length > 5) {
         shuffled = subRedditsInfo.sort(() => 0.5 - Math.random());
         selectedSubReddit = shuffled.slice(0, 5);
+    } else {
+        selectedSubReddit = subRedditsInfo;
     }
     for (let i = 0; i < selectedSubReddit.length; i++) {
         rtn = rtn.concat(await getPostsOfSubReddit(selectedSubReddit[i].subRedditName));
